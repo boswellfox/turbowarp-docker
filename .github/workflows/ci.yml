@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "**/Dockerfile"
+      - "**/nginx.conf"
+      - ".github/workflows/lint.yml"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      dockerfiles: ${{ steps.find.outputs.dockerfiles }}
+      nginx_confs: ${{ steps.find.outputs.nginx_confs }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find Dockerfiles and nginx.conf files
+        id: find
+        run: |
+          DOCKERFILES=$(find . -maxdepth 2 -name 'Dockerfile' | sed 's|^\./||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          NGINX_CONFS=$(find . -maxdepth 2 -name 'nginx.conf' | sed 's|^\./||' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "dockerfiles=$DOCKERFILES" >> "$GITHUB_OUTPUT"
+          echo "nginx_confs=$NGINX_CONFS" >> "$GITHUB_OUTPUT"
+
+  lint-dockerfiles:
+    needs: discover
+    if: needs.discover.outputs.dockerfiles != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: ${{ fromJson(needs.discover.outputs.dockerfiles) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint ${{ matrix.dockerfile }} with hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: ${{ matrix.dockerfile }}
+          ignore: DL3008,DL3018
+          failure-threshold: warning
+
+  lint-nginx-confs:
+    needs: discover
+    if: needs.discover.outputs.nginx_confs != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        nginx_conf: ${{ fromJson(needs.discover.outputs.nginx_confs) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate ${{ matrix.nginx_conf }} syntax
+        run: |
+          # nginx -t needs a full config, not just a server block, so we wrap
+          # the file being tested inside a minimal events{}/http{} shell and
+          # mount it in place of the default site config.
+          docker run --rm \
+            -v "${{ github.workspace }}/${{ matrix.nginx_conf }}:/etc/nginx/conf.d/default.conf:ro" \
+            nginx:alpine nginx -t
