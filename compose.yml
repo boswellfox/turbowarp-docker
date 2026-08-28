@@ -1,0 +1,26 @@
+name: turbowarp-docker
+
+services:
+  gui:
+    image: ghcr.io/boswellfox/turbowarp-docker/gui:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  packager:
+    image: ghcr.io/boswellfox/turbowarp-docker/packager:latest
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+
+  cloud-server:
+    image: ghcr.io/boswellfox/turbowarp-docker/cloud-server:latest
+    ports:
+      - "9080:9080"
+    restart: unless-stopped
+
+  extensions:
+    image: ghcr.io/boswellfox/turbowarp-docker/extensions:latest
+    ports:
+      - "8082:80"
+    restart: unless-stopped
