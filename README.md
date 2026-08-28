@@ -15,14 +15,14 @@ Container images for self-hosting [TurboWarp](https://turbowarp.org) components.
 
 The `gui`, `packager`, and `extensions` images use a common pattern:
 
-1. A multi-stage build stage (`node:20`/`node:22`) installs dependencies with `npm ci` and runs the project's production build.
+1. A multi-stage build stage (`node:22`) installs dependencies with `npm ci` and runs the project's production build.
 2. The build output is copied into an `nginx:alpine` runtime image.
 
 For these images the static frontend would normally need a running cloud server to function (e.g. for cloud variables / project data).
 
 `cloud-server` differs: it runs directly on `node:20` and serves the API via an Express-style server listening on port `9080`, rather than static nginx files.
 
-Reusable static-asset caching rules are defined in the shared `nginx.conf` included in the frontend images.
+Each frontend image carries its own component-specific nginx configuration, such as the `nginx.conf` copied in by `gui/Dockerfile`, rather than a single shared `nginx.conf`.
 
 ## Building an image
 

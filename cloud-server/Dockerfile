@@ -7,6 +7,8 @@ COPY src/package*.json ./
 RUN npm ci --omit=dev
 
 COPY src/ .
+RUN chown -R node:node /app
+USER node
 
 ENV PORT=9080
 EXPOSE 9080

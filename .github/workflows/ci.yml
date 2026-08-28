@@ -5,7 +5,7 @@ on:
     paths:
       - "**/Dockerfile"
       - "**/nginx.conf"
-      - ".github/workflows/lint.yml"
+      - ".github/workflows/ci.yml"
 
 jobs:
   discover:
@@ -54,10 +54,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate ${{ matrix.nginx_conf }} syntax
+        env:
+          NGINX_CONF: ${{ matrix.nginx_conf }}
         run: |
           # nginx -t needs a full config, not just a server block, so we wrap
           # the file being tested inside a minimal events{}/http{} shell and
           # mount it in place of the default site config.
           docker run --rm \
-            -v "${{ github.workspace }}/${{ matrix.nginx_conf }}:/etc/nginx/conf.d/default.conf:ro" \
+            -v "$GITHUB_WORKSPACE/$NGINX_CONF:/etc/nginx/conf.d/default.conf:ro" \
             nginx:alpine nginx -t
