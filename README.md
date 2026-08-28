@@ -2,6 +2,10 @@
 
 Container images for self-hosting [TurboWarp](https://turbowarp.org) components. Each component is a git submodule pointing at the upstream TurboWarp source, wrapped in its own multi-stage Docker build.
 
+> [!NOTE]
+>
+> Since these use the stock TurboWarp GUI, packager, extension gallery, and cloud server, most links go to `https://*.turbowarp.org`, not a self-hosted URL. This is being fixed.
+
 ## Components
 
 | Directory       | Submodule (upstream)                                                  | Image behavior                                                                     |
