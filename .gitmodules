@@ -7,3 +7,6 @@
 [submodule "packager/src"]
 	path = packager/src
 	url = https://github.com/turbowarp/packager.git
+[submodule "extensions/src"]
+	path = extensions/src
+	url = https://github.com/turbowarp/extensions.git
