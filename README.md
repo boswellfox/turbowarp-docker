@@ -18,9 +18,9 @@ The `gui`, `packager`, and `extensions` images use a common pattern:
 1. A multi-stage build stage (`node:22`) installs dependencies with `npm ci` and runs the project's production build.
 2. The build output is copied into an `nginx:alpine` runtime image.
 
-For these images the static frontend would normally need a running cloud server to function (e.g. for cloud variables / project data).
+The cloud server is optional: it provides cloud-variable hosting when the frontend is configured to use it, but the static sites do not require a running cloud server to function.
 
-`cloud-server` differs: it runs directly on `node:20` and serves the API via an Express-style server listening on port `9080`, rather than static nginx files.
+`cloud-server` differs: it runs directly on `node:22` and serves the API via an Express-style server listening on port `9080`, rather than static nginx files.
 
 Each frontend image carries its own component-specific nginx configuration, such as the `nginx.conf` copied in by `gui/Dockerfile`, rather than a single shared `nginx.conf`.
 
@@ -43,8 +43,10 @@ For the cloud server:
 
 ```sh
 docker build -t turbowarp-cloud-server ./cloud-server
-docker run -p 9080:9080 turbowarp-cloud-server
+docker run -p 127.0.0.1:9080:9080 turbowarp-cloud-server
 ```
+
+The cloud server does not terminate TLS itself; in production, expose it through a reverse proxy that terminates TLS for the frontend.
 
 ## Continuous integration
 

@@ -1,6 +1,6 @@
 # Different from gui/ and packager/
 
-FROM node:20-bullseye
+FROM node:22-bullseye
 WORKDIR /app
 
 COPY src/package*.json ./
