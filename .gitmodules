@@ -1,0 +1,12 @@
+[submodule "gui/src"]
+	path = gui/src
+	url = https://github.com/TurboWarp/scratch-gui.git
+[submodule "cloud-server/src"]
+	path = cloud-server/src
+	url = https://github.com/turbowarp/cloud-server.git
+[submodule "packager/src"]
+	path = packager/src
+	url = https://github.com/turbowarp/packager.git
+[submodule "extensions/src"]
+	path = extensions/src
+	url = https://github.com/turbowarp/extensions.git

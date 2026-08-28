@@ -1,0 +1,44 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - "*-v*.*.*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Parse service and version from tag
+        id: parse
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          SERVICE="${TAG%-v*}"
+          VERSION="${TAG#${SERVICE}-v}"
+          echo "service=$SERVICE" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${{ steps.parse.outputs.service }}
+          file: ./${{ steps.parse.outputs.service }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ steps.parse.outputs.service }}:${{ steps.parse.outputs.version }}
+            ghcr.io/${{ github.repository }}/${{ steps.parse.outputs.service }}:latest
